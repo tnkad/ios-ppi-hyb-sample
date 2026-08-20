@@ -1,0 +1,19 @@
+# Xcode
+xcuserdata/
+*.xcuserstate
+DerivedData/
+build/
+
+# SPM — Xcode 가 자동 생성. Package.resolved 를 커밋하지 않아 매체사가 항상 최신을 받는다.
+.swiftpm/
+.build/
+*.xcodeproj/project.xcworkspace/
+
+# CocoaPods — pod install 로 생성된다. 매체사가 각자 실행한다.
+# Podfile.lock 도 커밋하지 않는다. 샘플은 항상 현재 버전을 보여주는 편이 낫다.
+Pods/
+Podfile.lock
+*.xcworkspace
+
+# macOS
+.DS_Store

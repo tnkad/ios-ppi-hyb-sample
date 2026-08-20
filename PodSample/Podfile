@@ -1,0 +1,13 @@
+# TnkPpiHyb CocoaPods 연동 예제
+#
+# 사용법:
+#   pod install
+#   open PodSample.xcworkspace     ← .xcodeproj 가 아니라 workspace 를 연다
+#
+platform :ios, '14.0'
+
+target 'PodSample' do
+  use_frameworks!
+
+  pod 'TnkPpiHyb', '~> 0.1.0'
+end
