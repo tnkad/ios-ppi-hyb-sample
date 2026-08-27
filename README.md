@@ -4,7 +4,7 @@ TnkFactory 하이브리드 오퍼월 SDK를 **매체사가 실제로 붙이는 �
 SDK 소스는 들어 있지 않고, 배포된 바이너리를 SPM · CocoaPods로 받아 씁니다.
 
 - SDK 저장소: [tnkad/ios-ppi-hyb-sdk](https://github.com/tnkad/ios-ppi-hyb-sdk)
-- 연동 가이드 전문: 위 저장소의 `README.md`
+- 📖 연동 가이드 전문: https://tnkfactory.gitbook.io/sdk-docs/ios
 - 최소 지원: **iOS 14.0**
 
 ---
