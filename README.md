@@ -1,6 +1,6 @@
 # TnkPpiHyb 연동 샘플 (iOS)
 
-TnkFactory 하이브리드 오퍼월 SDK를 **매체사가 실제로 붙이는 방식 그대로** 구성한 예제입니다.
+TnkFactory 하이브리드 오퍼월 SDK를 **개발사가 실제로 붙이는 방식 그대로** 구성한 예제입니다.
 SDK 소스는 들어 있지 않고, 배포된 바이너리를 SPM · CocoaPods로 받아 씁니다.
 
 - SDK 저장소: [tnkad/ios-ppi-hyb-sdk](https://github.com/tnkad/ios-ppi-hyb-sdk)
@@ -60,7 +60,7 @@ end
 ```swift
 let sdk = TnkPpiHybSdk.shared
 sdk.configure(appId: "발급받은-앱-아이디")
-sdk.setUserName("매체측-사용자-식별값")   // 보상 지급 대상 식별값
+sdk.setUserName("개발사-사용자-식별값")   // 보상 지급 대상 식별값
 sdk.applicationStarted()
 
 sdk.setRewardListener { reward in
@@ -68,7 +68,7 @@ sdk.setRewardListener { reward in
 }
 ```
 
-`setUserName` 값이 **보상 지급의 기준**입니다. 매체사 회원 ID 등 사용자를 고유하게
+`setUserName` 값이 **보상 지급의 기준**입니다. 개발사 서비스의 회원 ID 등 사용자를 고유하게
 식별할 수 있는 값을 넣으세요.
 
 ### 2. ATT 동의 — `SceneDelegate.swift`
@@ -87,7 +87,7 @@ TnkPpiHybSdk.shared.requestTrackingAuthorization { granted in ... }
 // 풀스크린 모달 (일반적)
 TnkPpiHybSdk.shared.openOfferwall(from: self)
 
-// 매체가 자체 헤더를 쓰는 경우 오퍼월 상단 바를 숨긴다
+// 앱이 자체 헤더를 쓰는 경우 오퍼월 상단 바를 숨긴다
 TnkPpiHybSdk.shared.openOfferwall(from: self, extraParams: ["hideHeader": "1"])
 ```
 
@@ -125,7 +125,7 @@ xcrun simctl openurl booted "tnkscheme://select_menu?cat_id=3&filter_id=1"
 ```swift
 // SceneDelegate.swift
 sdk.configure(appId: "발급받은-앱-아이디")
-sdk.setUserName("매체측-사용자-식별값")
+sdk.setUserName("개발사-사용자-식별값")
 ```
 
 `Info.plist`에는 아래가 이미 들어 있습니다.
