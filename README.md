@@ -5,7 +5,7 @@ SDK 소스는 들어 있지 않고, 배포된 바이너리를 SPM · CocoaPods�
 
 - SDK 저장소: [tnkad/ios-ppi-hyb-sdk](https://github.com/tnkad/ios-ppi-hyb-sdk)
 - 📖 연동 가이드 전문: https://tnkfactory.gitbook.io/sdk-docs/ios
-- 최소 지원: **iOS 14.0**
+- 최소 지원: **iOS 15.0**
 
 ---
 
@@ -30,7 +30,7 @@ Xcode가 패키지를 자동으로 내려받습니다. 별도 설치 과정이 �
 패키지 참조는 프로젝트에 이렇게 박혀 있습니다.
 
 ```
-https://github.com/tnkad/ios-ppi-hyb-sdk   —   Up to Next Major Version: 0.1.0
+https://github.com/tnkad/ios-ppi-hyb-sdk   —   Up to Next Major Version: 1.0.2
 ```
 
 ### PodSample 실행
@@ -43,11 +43,11 @@ open PodSample.xcworkspace     # .xcodeproj 가 아님에 주의
 
 ```ruby
 # Podfile
-platform :ios, '14.0'
+platform :ios, '15.0'
 
 target 'PodSample' do
   use_frameworks!
-  pod 'TnkPpiHyb', '~> 0.1.0'
+  pod 'TnkPpiHyb', '~> 1.0', '>= 1.0.2'
 end
 ```
 

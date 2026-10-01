@@ -30,7 +30,7 @@ final class ViewController: UIViewController {
         ])
     }
 
-    /// iOS 14 를 지원하므로 UIButton.Configuration(iOS 15+)은 쓰지 않는다.
+    /// 기존 UIButton 스타일 API 로 구성한다. (UIButton.Configuration 을 써도 되지만 샘플은 단순함을 위해 쓰지 않는다.)
     private func button(_ title: String, _ action: Selector) -> UIButton {
         let b = UIButton(type: .system)
         b.setTitle(title, for: .normal)
