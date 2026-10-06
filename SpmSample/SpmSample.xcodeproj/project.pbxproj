@@ -267,7 +267,7 @@
 			repositoryURL = "https://github.com/tnkad/ios-ppi-hyb-sdk";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.2;
+				minimumVersion = 1.0.3;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

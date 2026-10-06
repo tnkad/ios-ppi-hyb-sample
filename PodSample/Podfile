@@ -9,5 +9,5 @@ platform :ios, '15.0'
 target 'PodSample' do
   use_frameworks!
 
-  pod 'TnkPpiHyb', '~> 1.0', '>= 1.0.2'
+  pod 'TnkPpiHyb', '~> 1.0', '>= 1.0.3'
 end
