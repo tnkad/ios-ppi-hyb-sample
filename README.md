@@ -30,7 +30,7 @@ Xcode가 패키지를 자동으로 내려받습니다. 별도 설치 과정이 �
 패키지 참조는 프로젝트에 이렇게 박혀 있습니다.
 
 ```
-https://github.com/tnkad/ios-ppi-hyb-sdk   —   Up to Next Major Version: 1.0.3
+https://github.com/tnkad/ios-ppi-hyb-sdk   —   Up to Next Major Version: 1.0.5
 ```
 
 ### PodSample 실행
@@ -47,7 +47,7 @@ platform :ios, '15.0'
 
 target 'PodSample' do
   use_frameworks!
-  pod 'TnkPpiHyb', '~> 1.0', '>= 1.0.3'
+  pod 'TnkPpiHyb', '~> 1.0', '>= 1.0.5'
 end
 ```
 
@@ -115,6 +115,27 @@ xcrun simctl openurl booted "tnkscheme://select_menu?cat_id=3&filter_id=1"
 ```
 
 > iOS 18+는 외부에서 커스텀 스킴을 열 때 확인 팝업을 띄웁니다. **[열기]를 탭해야** 앱에 전달됩니다.
+
+### 5. 개인정보 동의 철회 — `ViewController.swift`
+
+앱에 "개인정보 동의 철회" 동작(설정 화면의 버튼 등)이 있다면, 사용자가 그 동작을 했을 때 호출합니다.
+**SDK 1.0.5 이상**에서 제공합니다.
+
+```swift
+TnkPpiHybSdk.shared.revokePrivacyConsent()
+```
+
+파라미터·반환값이 없고 SDK가 화면을 띄우지도 않습니다. 예제는 호출 뒤 안내 알림만 보여줍니다.
+
+- 호출하면 동의가 바로 해제됩니다. 열려 있는 오퍼월은 첫 화면부터 다시 열리며 동의 팝업을 보여줍니다
+  (진행 상태 초기화). 이후 오퍼월에 들어갈 때도 동의 팝업부터 나옵니다.
+- **사용자의 철회 동작에서만** 호출하세요. 앱 시작이나 화면 복귀마다 부르면 오퍼월이 매번 첫 화면으로 돌아갑니다.
+  메인 스레드에서 호출하는 것을 권장합니다(예제는 버튼 액션이라 이미 메인 스레드입니다).
+- 철회한 사용자에게 `setAgreePrivacy(true)`를 다시 부르면 철회가 취소됩니다. 사전 동의를 직접 전달하는 앱은 주의하세요.
+- 오퍼월은 SDK가 만든 주소로 열어야 즉시 반영됩니다. `openOfferwall`, 특정 광고 진입(`adDetail` 등), 그리고
+  `buildOfferwallURL()` 결과를 `loadOfferwall`(삽입형) 또는 `TnkOfferwall.show`에 넘기는 방식이 모두 해당합니다.
+  임의로 만든 주소로 연 화면은 대상이 아닙니다.
+- 동의 상태는 서버에 저장하지 않고 이 기기에만 보관합니다. 다른 기기나 앱을 다시 설치한 뒤에는 이어진다고 보장되지 않으며, 보관 기간은 SDK 가 관리하지 않습니다.
 
 ---
 

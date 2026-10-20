@@ -1,9 +1,10 @@
 import UIKit
 import TnkPpiHyb
 
-/// 오퍼월 진입 두 가지 방식을 보여준다.
+/// 오퍼월 진입 두 가지 방식과 개인정보 동의 철회를 보여준다.
 ///  1. 풀스크린 모달  — 가장 일반적
 ///  2. 화면 안 삽입    — 매체 탭 안에 오퍼월을 넣는 경우
+///  3. 동의 철회      — 매체 앱의 "개인정보 동의 철회" 동작에서 호출 (SDK 1.0.5 이상)
 final class ViewController: UIViewController {
 
     private var embedded: TnkOfferwallView?
@@ -17,6 +18,7 @@ final class ViewController: UIViewController {
             button("오퍼월 열기 (풀스크린)", #selector(openFullscreen)),
             button("오퍼월 열기 (헤더 숨김)", #selector(openHideHeader)),
             button("화면 안에 삽입", #selector(openEmbedded)),
+            button("개인정보 동의 철회", #selector(revokeConsent)),
         ])
         stack.axis = .vertical
         stack.spacing = 12
@@ -62,6 +64,25 @@ final class ViewController: UIViewController {
     @objc private func openEmbedded() {
         let host = EmbeddedViewController()
         navigationController?.pushViewController(host, animated: true)
+    }
+
+    // MARK: - 3. 개인정보 동의 철회
+
+    /// 사용자가 앱에서 "동의 철회"를 눌렀을 때만 호출한다. 반환값은 없고 SDK 가 화면을 띄우지도 않는다.
+    /// ⚠️ 앱 시작·화면 복귀(viewDidAppear, sceneDidBecomeActive 등)에서 자동으로 부르지 않는다.
+    ///    호출할 때마다 열려 있는 오퍼월이 첫 화면으로 다시 로드된다.
+    /// ⚠️ 철회한 사용자에게 `setAgreePrivacy(true)` 를 다시 부르면 철회가 취소된다.
+    @objc private func revokeConsent() {
+        TnkPpiHybSdk.shared.revokePrivacyConsent()
+
+        // 반환값이 없으므로 샘플은 호출했다는 사실만 보여준다.
+        let alert = UIAlertController(
+            title: "동의 철회",
+            message: "개인정보 동의를 철회했습니다.\n이후 오퍼월에 들어가면 동의 팝업이 먼저 나옵니다.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        present(alert, animated: true)
     }
 }
 
