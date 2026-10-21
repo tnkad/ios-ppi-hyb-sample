@@ -87,14 +87,25 @@ TnkPpiHybSdk.shared.requestTrackingAuthorization { granted in ... }
 // 풀스크린 모달 (일반적)
 TnkPpiHybSdk.shared.openOfferwall(from: self)
 
-// 앱이 자체 헤더를 쓰는 경우 오퍼월 상단 바를 숨긴다
-TnkPpiHybSdk.shared.openOfferwall(from: self, extraParams: ["hideHeader": "1"])
+// 앱이 자체 헤더를 쓰는 경우 오퍼월 상단 바를 숨긴다 — 앱 내비게이션 스택에 push
+let host = EmbeddedViewController()
+host.extraParams = ["hideHeader": "1"]
+navigationController?.pushViewController(host, animated: true)
 ```
 
-화면 안에 삽입하는 방식은 `EmbeddedViewController`를 참고하세요.
+헤더를 숨긴 오퍼월은 닫기 버튼이 없으므로 풀스크린 모달(`openOfferwall`)로 띄우지 않고 앱 화면으로 push 합니다.
+앱의 내비게이션 바(뒤로 버튼)와 iOS 기본 왼쪽 가장자리 스와이프로 돌아옵니다.
+`EmbeddedViewController`가 `buildOfferwallURL(extraParams:)` 결과를 `TnkOfferwallView.loadOfferwall`로 로드하고,
+오퍼월이 닫기를 요청하면(`onCloseRequested`) 이전 화면으로 돌아갑니다.
+
+화면 안에 삽입하는 방식도 같은 `EmbeddedViewController`를 참고하세요.
 
 > ⚠️ 삽입해도 표시되는 것은 **오퍼월 전체 화면**입니다.
 > 특정 카테고리나 광고 상세만 노출하는 플레이스먼트 뷰는 제공하지 않습니다.
+
+샘플의 오퍼월 열기 버튼들(풀스크린·헤더 숨김·화면 안에 삽입)은 오퍼월 위에 "뒤로" 플로팅 버튼(`FloatingBackButton`)을 띄우고,
+누르면 샘플 메인 화면으로 바로 돌아갑니다.
+위 예시 코드(`openOfferwall`, `EmbeddedViewController`)는 그대로 쓰면 되고, `FloatingBackButton` 은 샘플 편의 기능이라 연동에 필요하지 않습니다.
 
 ### 4. 딥링크 — `SceneDelegate.swift`
 
