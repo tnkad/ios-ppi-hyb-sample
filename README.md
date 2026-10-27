@@ -103,25 +103,57 @@ navigationController?.pushViewController(host, animated: true)
 > ⚠️ 삽입해도 표시되는 것은 **오퍼월 전체 화면**입니다.
 > 특정 카테고리나 광고 상세만 노출하는 플레이스먼트 뷰는 제공하지 않습니다.
 
-샘플의 오퍼월 열기 버튼들(풀스크린·헤더 숨김·화면 안에 삽입)은 오퍼월 위에 "뒤로" 플로팅 버튼(`FloatingBackButton`)을 띄우고,
+샘플의 오퍼월 열기 버튼들(풀스크린·헤더 숨김·화면 안에 삽입)과 딥링크로 연 오퍼월(§4)은 오퍼월 위에 "뒤로" 플로팅 버튼(`FloatingBackButton`)을 띄우고,
 누르면 샘플 메인 화면으로 바로 돌아갑니다.
 위 예시 코드(`openOfferwall`, `EmbeddedViewController`)는 그대로 쓰면 되고, `FloatingBackButton` 은 샘플 편의 기능이라 연동에 필요하지 않습니다.
 
 ### 4. 딥링크 — `SceneDelegate.swift`
 
 `Info.plist`에 `tnkscheme`를 등록하고 진입점에서 SDK에 넘깁니다.
+앱이 떠 있을 때는 `openURLContexts`에서 넘깁니다.
+백그라운드에 있다가 딥링크로 돌아오는 경우에는 오퍼월을 띄울 화면을 찾지 못할 수 있으니 `from:`으로 화면을 함께 넘기세요.
 
 ```swift
 func scene(_ scene: UIScene, openURLContexts contexts: Set<UIOpenURLContext>) {
-    contexts.forEach { TnkPpiHybSdk.shared.handleScheme($0.url) }
+    contexts.forEach { TnkPpiHybSdk.shared.handleScheme($0.url, from: window?.rootViewController) }
 }
 ```
 
-콜드스타트(딥링크로 앱이 처음 뜨는 경우)는 `willConnectTo`의 `connectionOptions.urlContexts`를
-넘기면 됩니다. 앱 부팅 중 도착한 딥링크는 SDK가 큐에 담았다가 웹이 준비되면 전달합니다.
+앱이 꺼진 상태에서 딥링크로 실행될 때(콜드스타트)는 `willConnectTo`의 `connectionOptions.urlContexts`를 넘깁니다.
+이때 window를 만든 뒤 `window.rootViewController`를 `from:`으로 함께 넘깁니다.
+
+```swift
+func scene(_ scene: UIScene, willConnectTo session: UISceneSession,
+           options connectionOptions: UIScene.ConnectionOptions) {
+    guard let windowScene = scene as? UIWindowScene else { return }
+
+    // §1 초기화(configure · setUserName)를 먼저 마친 뒤 첫 화면을 구성합니다.
+    let window = UIWindow(windowScene: windowScene)
+    window.rootViewController = UINavigationController(rootViewController: ViewController())
+    self.window = window
+    window.makeKeyAndVisible()
+
+    // 앱이 막 시작되는 시점이라, 오퍼월을 띄울 화면을 함께 넘깁니다.
+    connectionOptions.urlContexts.forEach {
+        // false 면 SDK 가 처리하지 않은 링크이므로 앱이 직접 처리합니다 (샘플의 handleDeeplink 참고)
+        TnkPpiHybSdk.shared.handleScheme($0.url, from: window.rootViewController)
+    }
+}
+```
+
+앱이 꺼진 상태에서 딥링크로 실행될 때(콜드스타트)와 백그라운드에서 돌아올 때는 반드시 `from:`으로 오퍼월을 띄울 화면을 넘기세요.
+넘기지 않으면 오퍼월이 열리지 않을 수 있습니다.
+
+- 스토리보드로 첫 화면을 띄우는 앱은 window를 새로 만들지 말고, `willConnectTo`에서 이미 만들어져 있는 `window?.rootViewController`를 넘기세요.
+- 알림창·모달처럼 다른 화면을 띄워 둔 상태에서도 딥링크를 받을 수 있는 앱은 `window?.rootViewController` 대신 그 맨 위에 보이는 화면을 `from:`으로 넘기세요. 첫 화면이 이미 다른 화면을 띄우고 있으면 오퍼월이 열리지 않을 수 있습니다.
+- 이 샘플은 첫 화면(`window?.rootViewController`)만 넘기므로, §5 의 "개인정보 동의 철회" 알림이 떠 있을 때 받은 딥링크로는 오퍼월이 열리지 않습니다(알림을 닫고 다시 보내면 열립니다). 이때 샘플의 "뒤로" 버튼만 남을 수 있습니다.
+- 로그인 뒤에야 사용자 식별값을 아는 앱은 받은 링크를 보관했다가 `setUserName` 호출 뒤에 `handleScheme`에 넘기세요. 식별값 없이 연 오퍼월에서 생긴 보상은 올바른 사용자에게 지급되지 않을 수 있습니다.
+
+샘플 앱은 위 예시에 더해, 딥링크를 SDK 에 넘길 때 샘플 편의 기능인 "뒤로" 플로팅 버튼도 띄웁니다(§3, 연동에 필요하지 않습니다).
 
 ```sh
-# 시뮬레이터에서 테스트
+# 시뮬레이터에서 테스트 (앱을 종료한 상태에서 실행하면 콜드스타트 경로를 확인할 수 있습니다)
+# 앱을 실행한 뒤 홈으로 나간 상태에서 실행하면 백그라운드 복귀 경로를 확인할 수 있습니다
 xcrun simctl openurl booted "tnkscheme://select_menu?cat_id=3&filter_id=1"
 ```
 

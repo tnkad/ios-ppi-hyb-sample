@@ -5,6 +5,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
+    /// 샘플 편의 기능용 — 첫 화면 참조. SDK 연동과 무관하다.
+    private weak var home: ViewController?
+
     /// ATT 프롬프트는 1회만. sceneDidBecomeActive 는 포그라운드 복귀마다 불린다.
     private var didRequestATT = false
 
@@ -25,22 +28,31 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
 
         let window = UIWindow(windowScene: windowScene)
-        window.rootViewController = UINavigationController(rootViewController: ViewController())
+        let home = ViewController()
+        self.home = home
+        window.rootViewController = UINavigationController(rootViewController: home)
         self.window = window
         window.makeKeyAndVisible()
 
-        // 콜드스타트 딥링크 — 딥링크로 앱이 처음 뜨는 경로
-        connectionOptions.urlContexts.forEach { handleDeeplink($0.url) }
+        // 콜드스타트 딥링크 — 딥링크로 앱이 처음 뜨는 경로.
+        // 앱이 막 시작되는 시점이라 오퍼월을 띄울 화면(window.rootViewController)을 함께 넘긴다.
+        connectionOptions.urlContexts.forEach { handleDeeplink($0.url, from: window.rootViewController) }
     }
 
     /// 앱이 이미 떠 있을 때 들어오는 딥링크
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-        URLContexts.forEach { handleDeeplink($0.url) }
+        URLContexts.forEach { handleDeeplink($0.url, from: window?.rootViewController) }
     }
 
     /// tnkscheme:// 은 SDK 에 위임하고, 나머지는 매체가 직접 처리한다.
-    private func handleDeeplink(_ url: URL) {
-        if TnkPpiHybSdk.shared.handleScheme(url) { return }
+    /// 앱이 꺼진 상태에서 실행될 때(willConnectTo)와 앱이 떠 있을 때(openURLContexts, 백그라운드 복귀 포함) 모두
+    /// `presenter` 로 오퍼월을 띄울 화면을 넘긴다. 알림·모달을 띄워 둔 상태는 README §4 참고.
+    private func handleDeeplink(_ url: URL, from presenter: UIViewController? = nil) {
+        if TnkPpiHybSdk.shared.handleScheme(url, from: presenter) {
+            // 샘플 편의 기능 — SDK 기능 아님. 딥링크로 연 오퍼월 위에도 "뒤로" 플로팅 버튼을 띄운다. 연동에 필요한 코드는 아니다.
+            home?.showFloatingBackToHome(in: window?.windowScene)
+            return
+        }
         print("[Sample] 매체가 처리할 딥링크: \(url)")
     }
 

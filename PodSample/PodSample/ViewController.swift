@@ -12,11 +12,21 @@ final class ViewController: UIViewController {
     /// 샘플 편의 기능 — SDK 기능 아님. 파일 아래쪽 `FloatingBackButton` 참고.
     private let floatingBack = FloatingBackButton()
 
+    /// 이 화면이 한 번이라도 나타났는지. 딥링크로 앱이 처음 뜨는 경우 버튼 요청이 첫 화면이 나타나기 전에 들어온다.
+    private var hasAppeared = false
+    /// 첫 화면이 나타나기 전에 들어온 버튼 요청 — 나타난 뒤에 띄운다. (아래 viewDidAppear 의 hide() 에 곧바로 지워지지 않게)
+    private var pendingScene: UIWindowScene?
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         // 이 화면이 완전히 다시 보이면 플로팅 버튼도 치운다. (오퍼월 X·내비게이션 뒤로 버튼·스와이프로 돌아온 경우 모두.
         // 가장자리 스와이프를 하다 취소하면 이 메서드가 불리지 않으므로 버튼이 그대로 남는다.)
         floatingBack.hide()
+        hasAppeared = true
+        if let scene = pendingScene {
+            pendingScene = nil
+            showFloatingBackToHome(in: scene)
+        }
     }
 
     override func viewDidLoad() {
@@ -75,7 +85,7 @@ final class ViewController: UIViewController {
         host.title = "헤더 숨김"
         host.extraParams = ["hideHeader": "1"]
         navigationController?.pushViewController(host, animated: true)
-        showFloatingBackForPushed()
+        showFloatingBackToHome()
     }
 
     // MARK: - 2. 화면 안 삽입
@@ -86,13 +96,20 @@ final class ViewController: UIViewController {
     @objc private func openEmbedded() {
         let host = EmbeddedViewController()
         navigationController?.pushViewController(host, animated: true)
-        showFloatingBackForPushed()
+        showFloatingBackToHome()
     }
 
-    /// 샘플 편의 기능 — SDK 기능 아님. push 한 오퍼월 화면(헤더 숨김·삽입) 위에 "뒤로" 플로팅 버튼을 띄운다.
-    /// 누르면 오퍼월 안의 이전 페이지가 아니라 샘플 메인 화면으로 바로 돌아간다.
-    private func showFloatingBackForPushed() {
-        floatingBack.show(in: view.window?.windowScene) { [weak self] in
+    /// 샘플 편의 기능 — SDK 기능 아님. push 한 오퍼월 화면(헤더 숨김·삽입)과 딥링크로 연 오퍼월 위에 "뒤로" 플로팅 버튼을 띄운다.
+    /// 누르면 오퍼월 안의 이전 페이지가 아니라 샘플 메인 화면으로 바로 돌아간다. 연동에 필요한 코드는 아니다.
+    /// 딥링크는 이 화면이 가려져 있어도 들어오므로, 창(scene)은 호출하는 쪽이 넘긴다.
+    func showFloatingBackToHome(in scene: UIWindowScene? = nil) {
+        let scene = scene ?? view.window?.windowScene
+        guard hasAppeared else {
+            pendingScene = scene   // 첫 화면이 아직 나타나기 전 — 나타난 뒤 띄운다
+            return
+        }
+        floatingBack.show(in: scene) { [weak self] in
+            self?.floatingBack.hide()   // 화면이 안 떠 있어도 버튼은 치운다
             // 위에 떠 있는 화면이 있으면 먼저 닫고 홈으로
             self?.dismiss(animated: false)
             self?.navigationController?.popToRootViewController(animated: true)
